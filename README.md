@@ -84,3 +84,121 @@ Final-year engineering and computer science students often struggle with three c
 ---
 
 ## 🏗️ System Architecture & Data Flow
+┌────────────────────────────────────────────────────────────────────────┐
+│ Client Application │
+│ (React 19 + TypeScript + Tailwind CSS) │
+├──────────────────┬──────────────────┬──────────────────┬───────────────┤
+│ Student Profile │ Idea Generator │ Reality Checker │ Blueprint View│
+│ & Dashboard │ & Portfolio │ 10-Dim Audit │ & 6-Phase Map │
+└────────┬─────────┴────────┬─────────┴────────┬─────────┴───────┬───────┘
+│ │ │ │
+▼ ▼ ▼ ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│ Secure Express Backend (server.ts) │
+│ Listening on 0.0.0.0:3000 │
+├────────────────────────────────────────────────────────────────────────┤
+│ POST /api/generate-ideas POST /api/reality-check │
+│ POST /api/generate-blueprint POST /api/mentor-chat │
+│ POST /api/project-improvements GET /api/health │
+└──────────────────────────────────┬─────────────────────────────────────┘
+│ (process.env.GEMINI_API_KEY)
+▼
+┌────────────────────────────────────────────────────────────────────────┐
+│ Google Gemini AI API Platform │
+│ Model: gemini-2.5-flash │
+│ (@google/genai Server-Side SDK with JSON Schema) │
+└───────────────────────────────────────────────────────────────────────
+---
+
+## 💻 Tech Stack
+
+| Layer | Technology | Purpose |
+|---|---|---|
+| **Frontend Framework** | React 19, TypeScript | Reactive, type-safe single-page application |
+| **Styling & Icons** | Tailwind CSS v4, Lucide React | High-contrast, responsive UI with WCAG AA compliance |
+| **Animation & UX** | Motion (`motion/react`) | View transitions and milestone state indicators |
+| **Content Rendering** | React Markdown (`react-markdown`) | Rich markdown rendering for blueprints and mentor chat |
+| **Backend Framework** | Node.js, Express.js | Server-side proxy isolating Gemini API secrets |
+| **AI SDK** | `@google/genai` (Gemini 2.5/3.8 Flash) | High-speed structured JSON generation and chat |
+| **Database & Auth** | Firebase Auth & Firestore Rules | User identity, persistent blueprints, role-based rules |
+| **Local Persistence** | `localStorage` + Memory Service | Instant caching, offline usability, zero cold-start delay |
+| **Bundler & Build** | Vite 6 + `esbuild` | Dual client bundle (`dist/`) & single server (`server.cjs`) |
+| **Deployment Target** | Google Cloud Run (Port 3000) | Serverless container deployment with auto-scaling |
+
+---
+
+## 📂 Project Directory Structure
+projectforge/
+├── .env.example # Environment variables documentation
+├── index.html # Single-page HTML entry point
+├── metadata.json # AI Studio metadata & permission configuration
+├── package.json # Dependencies and build scripts
+├── README.md # Project documentation & academic report
+├── server.ts # Full-stack Express backend & Vite middleware
+├── tsconfig.json # TypeScript compiler configuration
+├── vite.config.ts # Vite frontend bundler configuration
+│
+└── src/
+├── App.tsx # Main state orchestrator & view router
+├── main.tsx # React DOM entry point
+├── index.css # Tailwind CSS entry imports
+│
+├── types/
+│ └── index.ts # Global TypeScript interfaces & schemas
+│
+├── services/
+│ ├── gemini.ts # Client API service proxying server endpoints
+│ └── storage.ts # LocalStorage & demo seed persistence engine
+│
+└── components/
+├── layout/
+│ ├── Header.tsx # Top navigation & project switcher
+│ └── Footer.tsx # Academic citations & system status footer
+├── landing/
+│ └── LandingView.tsx # Hero overview, feature grid & CTA
+├── onboarding/
+│ └── StudentProfileForm.tsx # 4-step student profile onboarding
+├── dashboard/
+│ └── DashboardView.tsx # Main student command center & next actions
+├── generator/
+│ └── IdeaGeneratorView.tsx # 3-tier idea generator with filtering
+├── reality-check/
+│ └── RealityCheckView.tsx # 10-dimension mathematical audit view
+├── blueprint/
+│ └── BlueprintView.tsx # 18-section technical specification view
+├── roadmap/
+│ └── RoadmapView.tsx # Interactive 6-phase milestone checklist
+├── mentor/
+│ └── MentorView.tsx # Context-aware AI technical mentor chat
+├── improvements/
+│ └── ImprovementsView.tsx # Architecture and security advisor
+├── projects/
+│ └── SavedProjectsView.tsx # Student portfolio & project management
+├── settings/
+│ └── SettingsView.tsx # Cloud diagnostics & demo reset controls
+└── tests/
+└── TestRunnerModal.tsx # In-app automated verification suite
+---
+
+## ⚙️ Getting Started & Installation
+
+### 1. Prerequisites
+- **Node.js**: v18.0.0 or higher
+- **npm**: v9.0.0 or higher
+- **Google Gemini API Key**: Obtainable from [Google AI Studio](https://aistudio.google.com/)
+
+### 2. Clone and Setup
+```bash
+# Clone the repository
+git clone <repository-url>
+cd projectforge
+
+# Install dependencies
+npm install
+👥 Student & Submission Details
+Project Title: ProjectForge — AI-Powered Engineering Capstone Mentor & Architecture Generator
+Domain: Artificial Intelligence, Full-Stack Web Engineering, EdTech
+Target Degree: Bachelor of Engineering / Bachelor of Technology (B.E. / B.Tech in CSE / AIML / IT)
+Academic Year: 2025–2026
+Developer / Student: Tanmay Udiya (swe.tanmayudiya@gmail.com)
+Institution: Parul University, Faculty of Engineering & Technology
