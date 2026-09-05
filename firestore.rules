@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validate User Entity
+    function isValidUser(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.id == request.auth.uid
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.email is string && data.email.size() <= 150
+        && (!('interests' in data) || (data.interests is list && data.interests.size() <= 30))
+        && (!('technicalSkills' in data) || (data.technicalSkills is list && data.technicalSkills.size() <= 40))
+        && data.experienceLevel in ['Beginner', 'Intermediate', 'Advanced']
+        && (!('isAdmin' in data)); // Prevent privilege escalation
+    }
+
+    // Validate Project Entity
+    function isValidProject(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId is string && data.userId == request.auth.uid
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 200
+        && data.domain is string && data.domain.size() <= 100
+        && data.difficulty in ['Beginner', 'Intermediate', 'Advanced'];
+    }
+
+    // Validate Milestone Entity
+    function isValidMilestone(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId is string && data.userId == request.auth.uid
+        && data.projectId is string && data.projectId.size() <= 128
+        && data.status in ['Not Started', 'In Progress', 'Completed']
+        && data.title is string && data.title.size() <= 200;
+    }
+
+    // Validate Mentor Message Entity
+    function isValidMentorMessage(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId is string && data.userId == request.auth.uid
+        && data.projectId is string && data.projectId.size() <= 128
+        && data.sender in ['user', 'mentor']
+        && data.content is string && data.content.size() <= 4000;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // PII protection: no listing users
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidId(userId) && isValidUser(incoming())
+        && incoming().id == existing().id
+        && !incoming().diff(existing()).affectedKeys().hasAny(['isAdmin', 'role']);
+      allow delete: if isOwner(userId);
+    }
+
+    // Projects Collection
+    match /projects/{projectId} {
+      allow get: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(projectId) && isValidProject(incoming());
+      allow update: if isSignedIn() && isValidId(projectId) && isValidProject(incoming())
+        && incoming().userId == existing().userId
+        && incoming().id == existing().id;
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+
+      // Subcollection: Milestones
+      match /milestones/{milestoneId} {
+        allow get: if isSignedIn() && existing().userId == request.auth.uid;
+        allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+        allow create: if isSignedIn() && isValidId(milestoneId) && isValidMilestone(incoming())
+          && incoming().projectId == projectId;
+        allow update: if isSignedIn() && isValidId(milestoneId) && isValidMilestone(incoming())
+          && incoming().userId == existing().userId
+          && incoming().projectId == existing().projectId;
+        allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+      }
+
+      // Subcollection: Mentor Messages
+      match /mentorMessages/{messageId} {
+        allow get: if isSignedIn() && existing().userId == request.auth.uid;
+        allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+        allow create: if isSignedIn() && isValidId(messageId) && isValidMentorMessage(incoming())
+          && incoming().projectId == projectId;
+        allow update: if false; // Mentor messages are immutable log records
+        allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+      }
+    }
+  }
+}

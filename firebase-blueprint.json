@@ -1,0 +1,95 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Registered student user profile in ProjectForge",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "format": "email", "maxLength": 150 },
+        "interests": { "type": "array" },
+        "technicalSkills": { "type": "array" },
+        "experienceLevel": { "type": "string", "enum": ["Beginner", "Intermediate", "Advanced"] },
+        "preferredDomain": { "type": "string", "maxLength": 100 },
+        "projectPurpose": { "type": "string", "maxLength": 100 },
+        "availableTime": { "type": "string", "maxLength": 50 },
+        "teamSize": { "type": "string", "maxLength": 50 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "name", "email", "experienceLevel", "preferredDomain"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "Student saved final year project with its blueprint and roadmap",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 200 },
+        "domain": { "type": "string", "maxLength": 100 },
+        "difficulty": { "type": "string", "enum": ["Beginner", "Intermediate", "Advanced"] },
+        "feasibilityScore": { "type": "number" },
+        "skillMatchScore": { "type": "number" },
+        "status": { "type": "string", "enum": ["planning", "in_progress", "completed"] },
+        "progressPercentage": { "type": "number" },
+        "idea": { "type": "object" },
+        "realityCheck": { "type": "object" },
+        "blueprint": { "type": "object" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "title", "domain", "difficulty"]
+    },
+    "Milestone": {
+      "title": "Milestone",
+      "description": "Development milestone task associated with a project",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "projectId": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "phaseNumber": { "type": "number" },
+        "title": { "type": "string", "maxLength": 200 },
+        "description": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["Not Started", "In Progress", "Completed"] },
+        "expectedOutput": { "type": "string", "maxLength": 300 },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "projectId", "userId", "phaseNumber", "title", "status"]
+    },
+    "MentorMessage": {
+      "title": "MentorMessage",
+      "description": "Conversation message between student and AI project mentor",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "projectId": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "sender": { "type": "string", "enum": ["user", "mentor"] },
+        "content": { "type": "string", "maxLength": 4000 },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["id", "projectId", "userId", "sender", "content", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Private student profile data accessible strictly by the profile owner"
+    },
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Project workspace document containing idea, blueprint, and reality check"
+    },
+    "/projects/{projectId}/milestones/{milestoneId}": {
+      "schema": "Milestone",
+      "description": "Interactive roadmap milestones linked relationally to parent project"
+    },
+    "/projects/{projectId}/mentorMessages/{messageId}": {
+      "schema": "MentorMessage",
+      "description": "Chronological AI mentor dialogue messages scoped to the project"
+    }
+  }
+}
